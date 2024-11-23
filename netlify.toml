@@ -1,0 +1,7 @@
+[build]
+  functions = "netlify/functions"   # Dossier contenant vos fonctions Lambda
+  publish = "public"                 # Dossier des fichiers statiques
+
+[dev]
+  command = "npm run dev"            # Commande pour démarrer le serveur en local
+  port = 8888 
