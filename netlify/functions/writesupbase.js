@@ -31,7 +31,7 @@ exports.handler = async function(event, context) {
   const addTodo = async (todoText) => {
     const { data, error } = await supabase
       .from('test')  // Replace 'test' with your table name
-      .insert([{ text: todoText, completed: false }]);  // Insert the new todo
+      .insert([{ text: todoText }]);  // Insert the new todo
 
     if (error) {
       console.error('Error inserting data:', error);
