@@ -5,3 +5,8 @@
 [dev]
   command = "npm run dev"            # Commande pour démarrer le serveur en local
   port = 8888 
+[[headers]]
+for = "/.netlify/functions/*"
+  [headers.values]
+  Access-Control-Allow-Origin = "*"
+  Access-Control-Allow-Methods = "GET, POST, OPTIONS"

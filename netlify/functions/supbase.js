@@ -2,7 +2,7 @@ const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 // Replace these with your actual URL and anon key
-const SUPABASE_URL = 'https://ppwleozcqnrblxahxdwb.supabase.co';
+const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_KEY;
 
 // Initialize Supabase client
