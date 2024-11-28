@@ -13,7 +13,7 @@ exports.handler = async function(event, context) {
   if (event.httpMethod !== 'GET') {
     return {
       statusCode: 405,
-      body: JSON.stringify({ message: 'Method Not Allowed' }),
+      body: 'Method Not Allowed',
     };
   }
 
@@ -24,7 +24,7 @@ exports.handler = async function(event, context) {
   if (!token) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ message: 'Token is required' }),
+      body: 'Token is required',
     };
   }
 
@@ -39,21 +39,21 @@ exports.handler = async function(event, context) {
   if (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ message: 'Error fetching parent data', error }),
+      body: 'Error fetching parent data',
     };
   }
 
-  // If the parent is found, return the ID
+  // If the parent is found, return the ID as plain text
   if (data) {
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'Parent found', parentId: data.id_parent }), // Return the 'id_parent'
+      body: `${data.id_parent}`, // Return only the id_parent as plain text
     };
   }
 
   // If no parent is found for the given token
   return {
     statusCode: 404,
-    body: JSON.stringify({ message: 'Parent not found for the given token' }),
+    body: 'Parent not found for the given token',
   };
 };
