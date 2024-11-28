@@ -1,15 +1,10 @@
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
-// Initialisation du client Supabase avec les variables d'environnement
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_KEY;
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// Fonction qui ajoute un parent
 exports.handler = async function(event, context) {
-  // Vérifier que la méthode HTTP est POST
+  // Check if the method is POST (for adding a parent)
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -17,10 +12,20 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // Récupérer les données envoyées dans le body de la requête
-  const { token, name, phone, email } = JSON.parse(event.body);
+  // Get the token from the body (assuming it's a JSON body)
+  let body;
+  try {
+    body = JSON.parse(event.body);
+  } catch (e) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: 'Invalid JSON body' }),
+    };
+  }
 
-  // Vérification du champ 'token' nécessaire
+  const { token } = body;
+
+  // Check if the token is provided
   if (!token) {
     return {
       statusCode: 400,
@@ -28,29 +33,42 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // Ajouter le parent à la base de données Supabase
+  // Step 1: Check if a parent with the same token already exists
   const { data, error } = await supabase
-    .from('parent') // Assurez-vous que la table 'parent' existe dans votre base de données
-    .insert([
-      {
-        nom: name || null, // Utiliser null si 'name' est non fourni
-        telephone: phone || null, // Utiliser null si 'phone' est non fourni
-        email: email || null, // Utiliser null si 'email' est non fourni
-        token_auth: token, // Vous pouvez également ajouter d'autres champs ici
-      },
-    ]);
+    .from('parent')
+    .select('id_parent')
+    .eq('token_auth', token)
+    .single(); // Get a single record if it exists
 
-  // Vérification des erreurs lors de l'insertion
   if (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ message: 'Error inserting parent', error }),
+      body: JSON.stringify({ message: 'Error fetching parent data', error }),
     };
   }
 
-  // Si tout est correct, retourner le parent inséré
+  // Step 2: If the parent exists, do nothing and return a message
+  if (data) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: 'Parent with this token already exists' }),
+    };
+  }
+
+  // Step 3: If the parent does not exist, insert a new record
+  const { insertError } = await supabase
+    .from('parent')
+    .insert([{ token_auth: token }]);
+
+  if (insertError) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: 'Error inserting parent', insertError }),
+    };
+  }
+
   return {
-    statusCode: 200,
-    body: JSON.stringify({ message: 'Parent added successfully', data }),
+    statusCode: 201,
+    body: JSON.stringify({ message: 'Parent added successfully' }),
   };
 };
